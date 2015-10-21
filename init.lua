@@ -1,9 +1,14 @@
 -- naturally growing trees
 -- rnd, 2015
 
-local TREE_SIZE = 20;
-local TRUNK_SIZE = 4;
-local BRANCH_LENGTH = 10.;
+-- local TREE_SIZE = 20;
+-- local TRUNK_SIZE = 4;
+-- local BRANCH_LENGTH = 10.;
+
+local TREE_SIZE = 30;
+local TRUNK_SIZE = 10;
+local BRANCH_LENGTH = 20.;
+
 
 minetest.register_node("rnd_trees:tree", {
 	description = "naturally growing tree",
@@ -33,6 +38,7 @@ minetest.register_abm({
 		local branch = meta:get_int("branch");
 		minetest.set_node(pos, {name = "default:tree"});
 		
+		
 		-- LEAVES 
 		if life<=0 or (life<TREE_SIZE-TRUNK_SIZE and math.random(5)==1)  then  -- either end of growth or above trunk randomly
 				local r;
@@ -52,8 +58,8 @@ minetest.register_abm({
 					end
 				end				
 		end
-		
 		if life<=0 then return end -- stop growth
+		
 		
 		local above  = {x=pos.x,y=pos.y+1,z=pos.z};
 		local nodename = minetest.get_node(above).name
@@ -67,14 +73,14 @@ minetest.register_abm({
 			end
 			
 			-- BRANCHING
-			if math.random(3)==1 and life<TREE_SIZE-TRUNK_SIZE and branch == 0 then -- not yet in branch
+			if (math.random(3)==1 or branch == 0) and life<TREE_SIZE-TRUNK_SIZE then -- not yet in branch
 				
-				local dir = {x=math.random(5)-3,y=0,z=math.random(5)-3};
-				if math.random(2)==1 then dir.y=(math.random(3)-2) end -- occassionaly branch nonhorizontaly 
+				local dir = {x=math.random(5)-3,y=math.random(2)-1,z=math.random(5)-3};
+				--if math.random(2)==1 then dir.y=(math.random(3)-2) end -- occassionaly branch nonhorizontaly 
 				local dirlen = math.sqrt(dir.x*dir.x+dir.y*dir.y+dir.z*dir.z);
 				if dirlen == 0 then dirlen = 1 end;	dir.x=dir.x/dirlen; dir.y=dir.y/dirlen; dir.z=dir.z/dirlen; -- normalize
 				
-				local length = math.random(life/TREE_SIZE*BRANCH_LENGTH)+1; -- length of branch
+				local length = math.random(math.pow(life/TREE_SIZE,1.5)*BRANCH_LENGTH)+1; -- length of branch
 				for i=1,length-1 do
 					local p = {x=above.x+dir.x*i,y=above.y+dir.y*i,z=above.z+dir.z*i};
 					nodename = minetest.get_node(p).name;
@@ -85,7 +91,7 @@ minetest.register_abm({
 				local grow = {x=above.x+dir.x*length,y=above.y+dir.y*length,z=above.z+dir.z*length};
 				minetest.set_node(grow,{name="rnd_trees:tree"});
 				meta = minetest.get_meta(grow);
-				meta:set_int("life",life-1);meta:set_int("branch",branch+1); -- remember that we branched
+				meta:set_int("life",life*math.pow(0.8,branch)-1);meta:set_int("branch",branch+length); -- remember that we branched
 				meta:set_string("infotext","branch, life ".. life-1);
 			
 			end
