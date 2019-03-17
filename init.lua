@@ -98,8 +98,14 @@ minetest.register_node("rnd_trees:tree", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		local meta = minetest.get_meta(pos);
 		meta:set_string("infotext","growth started");
+		-- Save materials
 		meta:set_string("trunkmat", TRUNK_NODE);
 		meta:set_string("leafmat", LEAF_NODE);
+		-- Save growth parameters
+		meta:set_int("treesize", TREE_SIZE)
+		meta:set_int("trunksize", TRUNK_SIZE)
+		meta:set_int("branchlength", BRANCH_LENGTH)
+		-- Save growth state
 		meta:set_int("life",TREE_SIZE);
 		meta:set_int("branch",0);
 	end
@@ -115,15 +121,22 @@ minetest.register_abm({
 		
 		
 		local meta = minetest.get_meta(pos);
+		-- Get growth state
 		local life = meta:get_int("life");
 		local branch = meta:get_int("branch");
+		-- Get materials
 		local trunkmat = meta:get_string("trunkmat");
 		local leafmat = meta:get_string("leafmat");
+		-- Get growth parameters
+		local treesize = meta:get_int("treesize")
+		local trunksize = meta:get_int("trunksize")
+		local branchlength = meta:get_int("branchlength")
+		-- Replace old growth node with trunk material
 		minetest.set_node(pos, {name = trunkmat});
 		
 		
 		-- LEAVES 
-		if life<=0 or (life<TREE_SIZE-TRUNK_SIZE and math.random(5)==1)  then  -- either end of growth or above trunk randomly
+		if life<=0 or (life < treesize - trunksize and math.random(5)==1)  then  -- either end of growth or above trunk randomly
 				local r;
 				if life <=0 then r = math.random(2)+1; -- determine leaves region size
 					else r = math.random(2);
@@ -156,14 +169,14 @@ minetest.register_abm({
 			end
 			
 			-- BRANCHING
-			if (math.random(3)==1 or branch == 0) and life<TREE_SIZE-TRUNK_SIZE then -- not yet in branch
+			if (math.random(3)==1 or branch == 0) and life < treesize - trunksize then -- not yet in branch
 				
 				local dir = {x=math.random(5)-3,y=math.random(2)-1,z=math.random(5)-3};
 				--if math.random(2)==1 then dir.y=(math.random(3)-2) end -- occassionaly branch nonhorizontaly 
 				local dirlen = math.sqrt(dir.x*dir.x+dir.y*dir.y+dir.z*dir.z);
 				if dirlen == 0 then dirlen = 1 end;	dir.x=dir.x/dirlen; dir.y=dir.y/dirlen; dir.z=dir.z/dirlen; -- normalize
 				
-				local length = math.random(math.pow(life/TREE_SIZE,1.5)*BRANCH_LENGTH)+1; -- length of branch
+				local length = math.random(math.pow(life/treesize,1.5)*branchlength)+1; -- length of branch
 				for i=1,length-1 do
 					local p = {x=above.x+dir.x*i,y=above.y+dir.y*i,z=above.z+dir.z*i};
 					nodename = minetest.get_node(p).name;
@@ -174,19 +187,32 @@ minetest.register_abm({
 				local grow = {x=above.x+dir.x*length,y=above.y+dir.y*length,z=above.z+dir.z*length};
 				minetest.set_node(grow,{name="rnd_trees:tree"});
 				meta = minetest.get_meta(grow);
+				-- Save growth state to new growth node
 				meta:set_int("life",life*math.pow(0.8,branch)-1);meta:set_int("branch",branch+length); -- remember that we branched
 				meta:set_string("infotext","branch, life ".. life-1);
+				-- Save tree materials
 				meta:set_string("trunkmat", trunkmat);
 				meta:set_string("leafmat", leafmat);
+				-- Save growth parameters
+				meta:set_int("treesize", treesize)
+				meta:set_int("trunksize", trunksize)
+				meta:set_int("branchlength", branchlength)
+				
 			end
 	
 			-- add new growing part
 			minetest.set_node(above,{name="rnd_trees:tree"});
 			meta = minetest.get_meta(above);
+			-- Save growth state
 			meta:set_int("life",life-1);meta:set_int("branch",branch); -- decrease life
-			meta:set_string("infotext","growing, life ".. life-math.random(TREE_SIZE*0.25));
+			meta:set_string("infotext","growing, life ".. life-math.random(treesize*0.25));
+			-- Save tree materials
 			meta:set_string("trunkmat", trunkmat);
 			meta:set_string("leafmat", leafmat);
+			-- Save growth parameters
+			meta:set_int("treesize", treesize)
+			meta:set_int("trunksize", trunksize)
+			meta:set_int("branchlength", branchlength)
 			
 			 if branch==0 then -- make main trunk a bit thicker
 				-- for i = -1,1 do
