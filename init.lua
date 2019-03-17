@@ -17,7 +17,12 @@ minetest.register_chatcommand("treespec", {
 	params = "<tree> <trunk> <branch>",
 	description = "Set <tree> <trunk> <branch> sizes for rndtrees mod",
 	privs = {},
-	func = function( _ , params)
+	func = function( name , params)
+		-- If command was not called by player, exit with error message
+		local player = minetest.get_player_by_name(name)
+		if not player then
+			return false, "Player not found"
+		end
 		-- Get the command parameters
 		param_list = {}
 		local i = 1
@@ -30,10 +35,10 @@ minetest.register_chatcommand("treespec", {
 			return false, "Correct format is '/treespec <tree> <trunk> <branch>'"
 		end
 		-- Else set parameters
-		TREE_SIZE = tonumber(param_list[1])
-		TRUNK_SIZE = tonumber(param_list[2])
-		BRANCH_LENGTH = tonumber(param_list[3])
-		return true, "Tree Size: " .. TREE_SIZE .. ", Trunk Size: " .. TRUNK_SIZE .. ", Branch Length: " .. BRANCH_LENGTH
+		player:set_attribute("TREE_SIZE", tonumber(param_list[1]))
+		player:set_attribute("TRUNK_SIZE", tonumber(param_list[2]))
+		player:set_attribute("BRANCH_LENGTH", tonumber(param_list[3]))
+		return true, "Tree Size: " .. player:get_attribute("TREE_SIZE") .. ", Trunk Size: " .. player:get_attribute("TRUNK_SIZE") .. ", Branch Length: " .. player:get_attribute("BRANCH_LENGTH")
 	end,
 })
 
@@ -53,8 +58,8 @@ minetest.register_chatcommand("trunkmat", {
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
 		if minetest.registered_nodes[wielded_item] ~= nil then
-			TRUNK_NODE = wielded_item
-			output = "Trunk Material: " .. TRUNK_NODE
+			player:set_attribute("TRUNK_NODE", wielded_item)
+			output = "Trunk Material: " .. player:get_attribute("TRUNK_NODE")
 		else
 		 	output = "It doesn't look like that's an acceptable node :("
 		end
@@ -78,8 +83,8 @@ minetest.register_chatcommand("leafmat", {
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
 		if minetest.registered_nodes[wielded_item] ~= nil  then
-			LEAF_NODE = wielded_item
-			output = "Leaf Material: " .. LEAF_NODE
+			player:set_attribute("LEAF_NODE", wielded_item)
+			output = "Leaf Material: " .. player:get_attribute("LEAF_NODE")
 		else
 			output = "It doesn't look like that's an acceptable node :("
 		end
@@ -95,32 +100,72 @@ minetest.register_node("rnd_trees:tree", {
 	is_ground_content = true,
 	groups = {cracky=3, stone=1},
 	drop = 'default:tree',
-	after_place_node = function(pos, placer, itemstack, pointed_thing)
+	after_place_node = function(pos, player, itemstack, pointed_thing)
+		-- Initialize properties for new node
+		local treesize = TREE_SIZE
+		local trunksize = TRUNK_SIZE
+		local branchlength = BRANCH_LENGTH
+		local trunkmat = TRUNK_NODE
+		local leafmat = LEAF_NODE
+
+		-- If player has attribute, set property, else set player attribute from property
+		if player then
+			if player:get_attribute("TREE_SIZE") then
+				treesize = player:get_attribute("TREE_SIZE")
+			else
+				player:set_attribute("TREE_SIZE", TREE_SIZE)
+			end
+
+			if player:get_attribute("TRUNK_SIZE") then
+				trunksize = player:get_attribute("TRUNK_SIZE")
+			else
+				player:set_attribute("TRUNK_SIZE", TRUNK_SIZE)
+			end
+
+			if player:get_attribute("BRANCH_LENGTH") then
+				branchlength = player:get_attribute("BRANCH_LENGTH")
+			else
+				player:set_attribute("BRANCH_LENGTH", BRANCH_LENGTH)
+			end
+
+			if player:get_attribute("TRUNK_NODE") then
+				trunkmat = player:get_attribute("TRUNK_NODE")
+			else
+				player:set_attribute("TRUNK_NODE", TRUNK_NODE)
+			end
+
+			if player:get_attribute("LEAF_NODE") then
+				leafmat = player:get_attribute("LEAF_NODE")
+			else
+				player:set_attribute("LEAF_NODE", LEAF_NODE)
+			end
+		end
+		-- Load meta for new block
 		local meta = minetest.get_meta(pos);
 		meta:set_string("infotext","growth started");
 		-- Save materials
-		meta:set_string("trunkmat", TRUNK_NODE);
-		meta:set_string("leafmat", LEAF_NODE);
+		meta:set_string("trunkmat", trunkmat);
+		meta:set_string("leafmat", leafmat);
 		-- Save growth parameters
 		-- If sizes are negative, use random
 		math.randomseed(os.time())
-		if TREE_SIZE < 0 then
+		if tonumber(treesize) < 0 then
 			math.random()
-			meta:set_int("treesize", math.random(math.ceil(TREE_SIZE / -2), TREE_SIZE * -1))
+			meta:set_int("treesize", math.random(math.ceil(treesize / -2), treesize * -1))
 		else
-			meta:set_int("treesize", TREE_SIZE)
+			meta:set_int("treesize", treesize)
 		end
-		if TRUNK_SIZE < 0 then
+		if tonumber(trunksize) < 0 then
 			math.random()
-			meta:set_int("trunksize", math.random(math.ceil(TRUNK_SIZE / -2), TRUNK_SIZE * -1))
+			meta:set_int("trunksize", math.random(math.ceil(trunksize / -2), trunksize * -1))
 		else
-			meta:set_int("trunksize", TRUNK_SIZE)
+			meta:set_int("trunksize", trunksize)
 		end
-		if BRANCH_LENGTH < 0 then
+		if tonumber(branchlength) < 0 then
 			math.random()
-			meta:set_int("branchlength", math.random(math.ceil(BRANCH_LENGTH / -2), BRANCH_LENGTH * -1))
+			meta:set_int("branchlength", math.random(math.ceil(branchlength / -2), branchlength * -1))
 		else
-			meta:set_int("branchlength", BRANCH_LENGTH)
+			meta:set_int("branchlength", branchlength)
 		end
 		-- Save growth state
 		meta:set_int("life",meta:get_int("treesize"));
