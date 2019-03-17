@@ -51,7 +51,7 @@ minetest.register_chatcommand("trunkmat", {
 		local wielded_item = player:get_wielded_item():get_name()
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
-		if string.match(wielded_item, "tree") then
+		if string.match(wielded_item, "tree") or string.match(wielded_item, "trunk") then
 			TRUNK_NODE = wielded_item
 			output = "Trunk Material: " .. TRUNK_NODE
 		else
