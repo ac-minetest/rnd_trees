@@ -8,6 +8,8 @@
 local TREE_SIZE = 30;
 local TRUNK_SIZE = 10;
 local BRANCH_LENGTH = 20.;
+local TRUNK_NODE = "default:tree"
+local LEAF_NODE = "default:leaves"
 
 -- Generation parameters chat command
 minetest.register_chatcommand("treespec", {
@@ -33,6 +35,57 @@ minetest.register_chatcommand("treespec", {
 		return true, "Tree Size: " .. TREE_SIZE .. ", Trunk Size: " .. TRUNK_SIZE .. ", Branch Length: " .. BRANCH_LENGTH
 	end,
 })
+
+-- Trunk material chat command
+minetest.register_chatcommand("trunkmat", {
+	params = "",
+	description = "Set trunk material to currently equipped node for rndtrees mod",
+	privs = {},
+	func = function( name , _ )
+		-- If command was not called by player, exit with error message
+		local player = minetest.get_player_by_name(name)
+		if not player then
+			return false, "Player not found"
+		end
+		-- If not, check if the player's wielded item is a tree trunk node
+		local wielded_item = player:get_wielded_item():get_name()
+		local output = ""
+		-- If it is, set the trunk node to that, otherwise exit with error message
+		if string.match(wielded_item, "tree") then
+			TRUNK_NODE = wielded_item
+			output = "Trunk Material: " .. TRUNK_NODE
+		else
+			output = "It doesn't look like that's a trunk node :("
+		end
+		return true, output
+	end,
+})
+
+-- Leaf material chat command
+minetest.register_chatcommand("leafmat", {
+	params = "",
+	description = "Set leaf material to currently equipped node for rndtrees mod",
+	privs = {},
+	func = function( name , _)
+		-- If command was not called by player, exit with error message
+		local player = minetest.get_player_by_name(name)
+		if not player then
+			return false, "Player not found"
+		end
+		-- If not, check if the player's wielded item is a tree trunk node
+		local wielded_item = player:get_wielded_item():get_name()
+		local output = ""
+		-- If it is, set the trunk node to that, otherwise exit with error message
+		if string.match(wielded_item, "leaves") or string.match(wielded_item, "needles") then
+			LEAF_NODE = wielded_item
+			output = "Leaf Material: " .. LEAF_NODE
+		else
+			output = "It doesn't look like that's a leaf node :("
+		end
+		return true, output
+	end,
+})
+
 
 minetest.register_node("rnd_trees:tree", {
 	description = "naturally growing tree",
@@ -60,7 +113,7 @@ minetest.register_abm({
 		local meta = minetest.get_meta(pos);
 		local life = meta:get_int("life");
 		local branch = meta:get_int("branch");
-		minetest.set_node(pos, {name = "default:tree"});
+		minetest.set_node(pos, {name = TRUNK_NODE});
 		
 		
 		-- LEAVES 
@@ -76,7 +129,7 @@ minetest.register_abm({
 						for k = -r,r do
 							local p = {x=pos.x+i,y=pos.y+j,z=pos.z+k};
 							if minetest.get_node(p).name == "air" and math.random(3)==1 then
-								minetest.set_node(p,{name="default:leaves"});
+								minetest.set_node(p,{name=LEAF_NODE});
 							end
 						end
 					end
@@ -89,7 +142,7 @@ minetest.register_abm({
 		local nodename = minetest.get_node(above).name
 		
 		-- GROWTH
-		if nodename == "air" or nodename == "default:leaves" then -- can we grow up
+		if nodename == "air" or nodename == LEAF_NODE then -- can we grow up
 			
 			if math.random(3)==1 then -- occasionaly change direction of growth a little
 				above.x=above.x+math.random(3)-2;
@@ -108,8 +161,8 @@ minetest.register_abm({
 				for i=1,length-1 do
 					local p = {x=above.x+dir.x*i,y=above.y+dir.y*i,z=above.z+dir.z*i};
 					nodename = minetest.get_node(p).name;
-					if  nodename== "air" or nodename == "default:leaves" then
-						minetest.set_node(p,{name="default:tree"});
+					if  nodename== "air" or nodename == LEAF_NODE then
+						minetest.set_node(p,{name=TRUNK_NODE});
 					end
 				end
 				local grow = {x=above.x+dir.x*length,y=above.y+dir.y*length,z=above.z+dir.z*length};
@@ -130,10 +183,10 @@ minetest.register_abm({
 				-- for i = -1,1 do
 					-- for j = -1,1 do
 						-- if math.random(4)==1 then
-							minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z},{name="default:tree"});
-							minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z},{name="default:tree"});
-							minetest.set_node({x=pos.x,y=pos.y,z=pos.z+1},{name="default:tree"});
-							minetest.set_node({x=pos.x,y=pos.y,z=pos.z-1},{name="default:tree"});
+							minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z},{name=TRUNK_NODE});
+							minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z},{name=TRUNK_NODE});
+							minetest.set_node({x=pos.x,y=pos.y,z=pos.z+1},{name=TRUNK_NODE});
+							minetest.set_node({x=pos.x,y=pos.y,z=pos.z-1},{name=TRUNK_NODE});
 						-- end
 					-- end
 				-- end
