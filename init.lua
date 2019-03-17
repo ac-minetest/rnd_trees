@@ -1,5 +1,6 @@
 -- naturally growing trees
 -- rnd, 2015
+-- Bertrand the Healer, 2019
 
 -- local TREE_SIZE = 20;
 -- local TRUNK_SIZE = 4;
@@ -11,7 +12,7 @@ local BRANCH_LENGTH = 20.;
 local TRUNK_NODE = "default:tree"
 local LEAF_NODE = "default:leaves"
 
--- Generation parameters chat command
+-- Tree generation settings
 minetest.register_chatcommand("treespec", {
 	params = "<tree> <trunk> <branch>",
 	description = "Set <tree> <trunk> <branch> sizes for rndtrees mod",
@@ -36,7 +37,7 @@ minetest.register_chatcommand("treespec", {
 	end,
 })
 
--- Trunk material chat command
+-- Trunk material
 minetest.register_chatcommand("trunkmat", {
 	params = "",
 	description = "Set trunk material to currently equipped node for rndtrees mod",
@@ -51,17 +52,17 @@ minetest.register_chatcommand("trunkmat", {
 		local wielded_item = player:get_wielded_item():get_name()
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
-		if string.match(wielded_item, "tree") or string.match(wielded_item, "trunk") then
+		-- if string.match(wielded_item, "tree") or string.match(wielded_item, "trunk") then
 			TRUNK_NODE = wielded_item
 			output = "Trunk Material: " .. TRUNK_NODE
-		else
-			output = "It doesn't look like that's a trunk node :("
-		end
+		-- else
+		-- 	output = "It doesn't look like that's a trunk node :("
+		-- end
 		return true, output
 	end,
 })
 
--- Leaf material chat command
+-- Leaf material
 minetest.register_chatcommand("leafmat", {
 	params = "",
 	description = "Set leaf material to currently equipped node for rndtrees mod",
@@ -76,17 +77,18 @@ minetest.register_chatcommand("leafmat", {
 		local wielded_item = player:get_wielded_item():get_name()
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
-		if string.match(wielded_item, "leaves") or string.match(wielded_item, "needles") then
+		-- if string.match(wielded_item, "leaves") or string.match(wielded_item, "needles") then
 			LEAF_NODE = wielded_item
 			output = "Leaf Material: " .. LEAF_NODE
-		else
-			output = "It doesn't look like that's a leaf node :("
-		end
+		-- else
+		-- 	output = "It doesn't look like that's a leaf node :("
+		-- end
 		return true, output
 	end,
 })
 
 
+-- Tree growing stuff
 minetest.register_node("rnd_trees:tree", {
 	description = "naturally growing tree",
 	tiles = {"default_tree.png"},
@@ -96,6 +98,8 @@ minetest.register_node("rnd_trees:tree", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		local meta = minetest.get_meta(pos);
 		meta:set_string("infotext","growth started");
+		meta:set_string("trunkmat", TRUNK_NODE);
+		meta:set_string("leafmat", LEAF_NODE);
 		meta:set_int("life",TREE_SIZE);
 		meta:set_int("branch",0);
 	end
@@ -113,7 +117,9 @@ minetest.register_abm({
 		local meta = minetest.get_meta(pos);
 		local life = meta:get_int("life");
 		local branch = meta:get_int("branch");
-		minetest.set_node(pos, {name = TRUNK_NODE});
+		local trunkmat = meta:get_string("trunkmat");
+		local leafmat = meta:get_string("leafmat");
+		minetest.set_node(pos, {name = trunkmat});
 		
 		
 		-- LEAVES 
@@ -129,7 +135,7 @@ minetest.register_abm({
 						for k = -r,r do
 							local p = {x=pos.x+i,y=pos.y+j,z=pos.z+k};
 							if minetest.get_node(p).name == "air" and math.random(3)==1 then
-								minetest.set_node(p,{name=LEAF_NODE});
+								minetest.set_node(p,{name=leafmat});
 							end
 						end
 					end
@@ -142,7 +148,7 @@ minetest.register_abm({
 		local nodename = minetest.get_node(above).name
 		
 		-- GROWTH
-		if nodename == "air" or nodename == LEAF_NODE then -- can we grow up
+		if nodename == "air" or nodename == leafmat then -- can we grow up
 			
 			if math.random(3)==1 then -- occasionaly change direction of growth a little
 				above.x=above.x+math.random(3)-2;
@@ -161,8 +167,8 @@ minetest.register_abm({
 				for i=1,length-1 do
 					local p = {x=above.x+dir.x*i,y=above.y+dir.y*i,z=above.z+dir.z*i};
 					nodename = minetest.get_node(p).name;
-					if  nodename== "air" or nodename == LEAF_NODE then
-						minetest.set_node(p,{name=TRUNK_NODE});
+					if  nodename== "air" or nodename == leafmat then
+						minetest.set_node(p,{name=trunkmat});
 					end
 				end
 				local grow = {x=above.x+dir.x*length,y=above.y+dir.y*length,z=above.z+dir.z*length};
@@ -170,7 +176,8 @@ minetest.register_abm({
 				meta = minetest.get_meta(grow);
 				meta:set_int("life",life*math.pow(0.8,branch)-1);meta:set_int("branch",branch+length); -- remember that we branched
 				meta:set_string("infotext","branch, life ".. life-1);
-			
+				meta:set_string("trunkmat", trunkmat);
+				meta:set_string("leafmat", leafmat);
 			end
 	
 			-- add new growing part
@@ -178,15 +185,17 @@ minetest.register_abm({
 			meta = minetest.get_meta(above);
 			meta:set_int("life",life-1);meta:set_int("branch",branch); -- decrease life
 			meta:set_string("infotext","growing, life ".. life-math.random(TREE_SIZE*0.25));
+			meta:set_string("trunkmat", trunkmat);
+			meta:set_string("leafmat", leafmat);
 			
 			 if branch==0 then -- make main trunk a bit thicker
 				-- for i = -1,1 do
 					-- for j = -1,1 do
 						-- if math.random(4)==1 then
-							minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z},{name=TRUNK_NODE});
-							minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z},{name=TRUNK_NODE});
-							minetest.set_node({x=pos.x,y=pos.y,z=pos.z+1},{name=TRUNK_NODE});
-							minetest.set_node({x=pos.x,y=pos.y,z=pos.z-1},{name=TRUNK_NODE});
+							minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z},{name=trunkmat});
+							minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z},{name=trunkmat});
+							minetest.set_node({x=pos.x,y=pos.y,z=pos.z+1},{name=trunkmat});
+							minetest.set_node({x=pos.x,y=pos.y,z=pos.z-1},{name=trunkmat});
 						-- end
 					-- end
 				-- end
