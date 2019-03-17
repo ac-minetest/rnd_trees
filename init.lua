@@ -9,6 +9,30 @@ local TREE_SIZE = 30;
 local TRUNK_SIZE = 10;
 local BRANCH_LENGTH = 20.;
 
+-- Generation parameters chat command
+minetest.register_chatcommand("treespec", {
+	params = "<tree> <trunk> <branch>",
+	description = "Set <tree> <trunk> <branch> sizes for rndtrees mod",
+	privs = {},
+	func = function( _ , params)
+		-- Get the command parameters
+		param_list = {}
+		local i = 1
+		for value in string.gmatch(params, "[^%s]+") do 
+			param_list[i] = value
+			i = i + 1
+		end
+		-- Exit with error if there aren't enough
+		if i <= 3 then
+			return false, "Correct format is '/treespec <tree> <trunk> <branch>'"
+		end
+		-- Else set parameters
+		TREE_SIZE = param_list[1]
+		TRUNK_SIZE = param_list[2]
+		BRANCH_LENGTH = param_list[3]
+		return true, "Tree Size: " .. TREE_SIZE .. ", Trunk Size: " .. TRUNK_SIZE .. ", Branch Length: " .. BRANCH_LENGTH
+	end,
+})
 
 minetest.register_node("rnd_trees:tree", {
 	description = "naturally growing tree",
