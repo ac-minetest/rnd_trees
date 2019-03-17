@@ -12,7 +12,7 @@ local BRANCH_LENGTH = 20.;
 local TRUNK_NODE = "default:tree"
 local LEAF_NODE = "default:leaves"
 
--- Tree generation settings
+-- Generation parameters chat command
 minetest.register_chatcommand("treespec", {
 	params = "<tree> <trunk> <branch>",
 	description = "Set <tree> <trunk> <branch> sizes for rndtrees mod",
@@ -21,7 +21,7 @@ minetest.register_chatcommand("treespec", {
 		-- Get the command parameters
 		param_list = {}
 		local i = 1
-		for value in string.gmatch(params, "[^%s]+") do 
+		for value in string.gmatch(params, "[%d]+") do 
 			param_list[i] = value
 			i = i + 1
 		end
@@ -37,7 +37,7 @@ minetest.register_chatcommand("treespec", {
 	end,
 })
 
--- Trunk material
+-- Trunk material chat command
 minetest.register_chatcommand("trunkmat", {
 	params = "",
 	description = "Set trunk material to currently equipped node for rndtrees mod",
@@ -62,7 +62,7 @@ minetest.register_chatcommand("trunkmat", {
 	end,
 })
 
--- Leaf material
+-- Leaf material chat command
 minetest.register_chatcommand("leafmat", {
 	params = "",
 	description = "Set leaf material to currently equipped node for rndtrees mod",
@@ -88,7 +88,7 @@ minetest.register_chatcommand("leafmat", {
 })
 
 
--- Tree growing stuff
+-- Tree growth node
 minetest.register_node("rnd_trees:tree", {
 	description = "naturally growing tree",
 	tiles = {"default_tree.png"},
@@ -105,7 +105,7 @@ minetest.register_node("rnd_trees:tree", {
 	end
 })
 
-
+-- Growing function
 minetest.register_abm({
 	nodenames = {"rnd_trees:tree"},
 	neighbors = {"air"},
