@@ -21,7 +21,7 @@ minetest.register_chatcommand("treespec", {
 		-- Get the command parameters
 		param_list = {}
 		local i = 1
-		for value in string.gmatch(params, "[%d]+") do 
+		for value in string.gmatch(params, "[+-]?[%d]+") do 
 			param_list[i] = value
 			i = i + 1
 		end
@@ -30,9 +30,9 @@ minetest.register_chatcommand("treespec", {
 			return false, "Correct format is '/treespec <tree> <trunk> <branch>'"
 		end
 		-- Else set parameters
-		TREE_SIZE = param_list[1]
-		TRUNK_SIZE = param_list[2]
-		BRANCH_LENGTH = param_list[3]
+		TREE_SIZE = tonumber(param_list[1])
+		TRUNK_SIZE = tonumber(param_list[2])
+		BRANCH_LENGTH = tonumber(param_list[3])
 		return true, "Tree Size: " .. TREE_SIZE .. ", Trunk Size: " .. TRUNK_SIZE .. ", Branch Length: " .. BRANCH_LENGTH
 	end,
 })
@@ -102,11 +102,28 @@ minetest.register_node("rnd_trees:tree", {
 		meta:set_string("trunkmat", TRUNK_NODE);
 		meta:set_string("leafmat", LEAF_NODE);
 		-- Save growth parameters
-		meta:set_int("treesize", TREE_SIZE)
-		meta:set_int("trunksize", TRUNK_SIZE)
-		meta:set_int("branchlength", BRANCH_LENGTH)
+		-- If sizes are negative, use random
+		math.randomseed(os.time())
+		if TREE_SIZE < 0 then
+			math.random()
+			meta:set_int("treesize", math.random(math.ceil(TREE_SIZE / -2), TREE_SIZE * -1))
+		else
+			meta:set_int("treesize", TREE_SIZE)
+		end
+		if TRUNK_SIZE < 0 then
+			math.random()
+			meta:set_int("trunksize", math.random(math.ceil(TRUNK_SIZE / -2), TRUNK_SIZE * -1))
+		else
+			meta:set_int("trunksize", TRUNK_SIZE)
+		end
+		if BRANCH_LENGTH < 0 then
+			math.random()
+			meta:set_int("branchlength", math.random(math.ceil(BRANCH_LENGTH / -2), BRANCH_LENGTH * -1))
+		else
+			meta:set_int("branchlength", BRANCH_LENGTH)
+		end
 		-- Save growth state
-		meta:set_int("life",TREE_SIZE);
+		meta:set_int("life",meta:get_int("treesize"));
 		meta:set_int("branch",0);
 	end
 })
