@@ -52,11 +52,11 @@ minetest.register_chatcommand("trunkmat", {
 		local wielded_item = player:get_wielded_item():get_name()
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
-		if string.match(wielded_item, "tree") or string.match(wielded_item, "trunk") then
+		if minetest.registered_nodes[wielded_item] ~= nil then
 			TRUNK_NODE = wielded_item
 			output = "Trunk Material: " .. TRUNK_NODE
 		else
-		 	output = "It doesn't look like that's a trunk node :("
+		 	output = "It doesn't look like that's an acceptable node :("
 		end
 		return true, output
 	end,
@@ -77,11 +77,11 @@ minetest.register_chatcommand("leafmat", {
 		local wielded_item = player:get_wielded_item():get_name()
 		local output = ""
 		-- If it is, set the trunk node to that, otherwise exit with error message
-		if string.match(wielded_item, "leaves") or string.match(wielded_item, "needles") then
+		if minetest.registered_nodes[wielded_item] ~= nil  then
 			LEAF_NODE = wielded_item
 			output = "Leaf Material: " .. LEAF_NODE
 		else
-			output = "It doesn't look like that's a leaf node :("
+			output = "It doesn't look like that's an acceptable node :("
 		end
 		return true, output
 	end,
