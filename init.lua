@@ -280,10 +280,42 @@ minetest.register_abm({
 				-- for i = -1,1 do
 					-- for j = -1,1 do
 						-- if math.random(4)==1 then
+							-------
+							---x---
+							--x0x--
+							---x---
+							-------
 							minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z},{name=trunkmat});
 							minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z},{name=trunkmat});
 							minetest.set_node({x=pos.x,y=pos.y,z=pos.z+1},{name=trunkmat});
 							minetest.set_node({x=pos.x,y=pos.y,z=pos.z-1},{name=trunkmat});
+							-- Make trunk even thicker if tree is big enough
+							if (treesize + branchlength) > 60 then
+								--------
+								---0x---
+								--000x--
+								--x0xx--
+								---xx---
+								--------
+								minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z-1},{name=trunkmat});
+								minetest.set_node({x=pos.x,y=pos.y,z=pos.z-2},{name=trunkmat});
+								minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z+1},{name=trunkmat});
+								minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z},{name=trunkmat});
+								minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z-1},{name=trunkmat});
+								minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z-2},{name=trunkmat});
+								minetest.set_node({x=pos.x-2,y=pos.y,z=pos.z},{name=trunkmat});
+								minetest.set_node({x=pos.x-2,y=pos.y,z=pos.z-1},{name=trunkmat});
+							elseif (treesize +branchlength) > 40 then
+								-------
+								--x0x--
+								--000--
+								--x0x--
+								-------
+								minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z+1},{name=trunkmat});
+								minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z-1},{name=trunkmat});
+								minetest.set_node({x=pos.x+1,y=pos.y,z=pos.z-1},{name=trunkmat});
+								minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z+1},{name=trunkmat});
+							end
 						-- end
 					-- end
 				-- end
