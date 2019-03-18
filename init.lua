@@ -95,7 +95,7 @@ minetest.register_chatcommand("leafmat", {
 
 -- Tree growth node
 minetest.register_node("rnd_trees:tree", {
-	description = "naturally growing tree",
+	description = "Naturally growing tree",
 	tiles = {"default_tree.png"},
 	is_ground_content = true,
 	groups = {cracky=3, stone=1},
@@ -173,9 +173,140 @@ minetest.register_node("rnd_trees:tree", {
 	end
 })
 
+-- Apple tree growth node
+minetest.register_node("rnd_trees:appletree", {
+	description = "Naturally growing apple tree",
+	tiles = {"default_tree.png"},
+	is_ground_content = true,
+	groups = {cracky=3, stone=1},
+	drop = 'default:tree',
+	after_place_node = function(pos, player, itemstack, pointed_thing)
+		-- Load meta for new block
+		local meta = minetest.get_meta(pos);
+		meta:set_string("infotext","growth started");
+		-- Save materials
+		meta:set_string("trunkmat", "default:tree");
+		meta:set_string("leafmat", "default:leaves");
+		-- Save growth parameters
+		math.randomseed(os.time())
+		math.random()
+		meta:set_int("treesize", 6)
+		meta:set_int("trunksize", 3)
+		meta:set_int("branchlength", math.random(2, 4))
+		-- Save growth state
+		meta:set_int("life",meta:get_int("treesize"));
+		meta:set_int("branch",0);
+	end
+})
+
+-- Jungle tree growth node
+minetest.register_node("rnd_trees:jungletree", {
+	description = "Naturally growing jungle tree",
+	tiles = {"default_jungletree.png"},
+	is_ground_content = true,
+	groups = {cracky=3, stone=1},
+	drop = 'default:jungletree',
+	after_place_node = function(pos, player, itemstack, pointed_thing)
+		-- Load meta for new block
+		local meta = minetest.get_meta(pos);
+		meta:set_string("infotext","growth started");
+		-- Save materials
+		meta:set_string("trunkmat", "default:jungletree");
+		meta:set_string("leafmat", "default:jungleleaves");
+		-- Save growth parameters
+		math.randomseed(os.time())
+		math.random()
+		meta:set_int("treesize", math.random(10, 28))
+		meta:set_int("trunksize", math.ceil(meta:get_int("treesize")/3))
+		meta:set_int("branchlength", math.random(1, 3))
+		-- Save growth state
+		meta:set_int("life",meta:get_int("treesize"));
+		meta:set_int("branch",0);
+	end
+})
+
+-- Pine tree growth node
+minetest.register_node("rnd_trees:pinetree", {
+	description = "Naturally growing pine tree",
+	tiles = {"default_pine_tree.png"},
+	is_ground_content = true,
+	groups = {cracky=3, stone=1},
+	drop = 'default:pine_tree',
+	after_place_node = function(pos, player, itemstack, pointed_thing)
+		-- Load meta for new block
+		local meta = minetest.get_meta(pos);
+		meta:set_string("infotext","growth started");
+		-- Save materials
+		meta:set_string("trunkmat", "default:pine_tree");
+		meta:set_string("leafmat", "default:pine_needles");
+		-- Save growth parameters
+		math.randomseed(os.time())
+		math.random()
+		meta:set_int("treesize", math.random(8, 13))
+		meta:set_int("trunksize", math.ceil(meta:get_int("treesize")/4))
+		meta:set_int("branchlength", 0)
+		-- Save growth state
+		meta:set_int("life",meta:get_int("treesize"));
+		meta:set_int("branch",0);
+	end
+})
+
+-- Acacia tree growth node
+minetest.register_node("rnd_trees:acaciatree", {
+	description = "Naturally growing acacia tree",
+	tiles = {"default_acacia_tree.png"},
+	is_ground_content = true,
+	groups = {cracky=3, stone=1},
+	drop = 'default:acacia_tree',
+	after_place_node = function(pos, player, itemstack, pointed_thing)
+		-- Load meta for new block
+		local meta = minetest.get_meta(pos);
+		meta:set_string("infotext","growth started");
+		-- Save materials
+		meta:set_string("trunkmat", "default:acacia_tree");
+		meta:set_string("leafmat", "default:acacia_leaves");
+		-- Save growth parameters
+		math.randomseed(os.time())
+		math.random()
+		meta:set_int("treesize", math.random(10, 12))
+		meta:set_int("trunksize", math.random(3, 5))
+		meta:set_int("branchlength", 15)
+		-- Save growth state
+		meta:set_int("life",meta:get_int("treesize"));
+		meta:set_int("branch",0);
+	end
+})
+
+-- Aspen tree growth node
+minetest.register_node("rnd_trees:aspentree", {
+	description = "Naturally growing aspen tree",
+	tiles = {"default_aspen_tree.png"},
+	is_ground_content = true,
+	groups = {cracky=3, stone=1},
+	drop = 'default:aspen_tree',
+	after_place_node = function(pos, player, itemstack, pointed_thing)
+		-- Load meta for new block
+		local meta = minetest.get_meta(pos);
+		meta:set_string("infotext","growth started");
+		-- Save materials
+		meta:set_string("trunkmat", "default:aspen_tree");
+		meta:set_string("leafmat", "default:aspen_leaves");
+		-- Save growth parameters
+		math.randomseed(os.time())
+		math.random()
+		meta:set_int("treesize", math.random(15, 20))
+		meta:set_int("trunksize", math.ceil(meta:get_int("treesize")/5))
+		meta:set_int("branchlength", 0)
+		-- Save growth state
+		meta:set_int("life",meta:get_int("treesize"));
+		meta:set_int("branch",0);
+	end
+})
+
 -- Growing function
 minetest.register_abm({
-	nodenames = {"rnd_trees:tree"},
+	nodenames = {"rnd_trees:tree", "rnd_trees:appletree", "rnd_trees:jungletree", "rnd_trees:pinetree",
+					"rnd_trees:acaciatree", "rnd_trees:aspentree"},
 	neighbors = {"air"},
 	interval = 1.0,
 	chance = 2,
@@ -200,8 +331,9 @@ minetest.register_abm({
 		-- LEAVES 
 		if life<=0 or (life < treesize - trunksize and math.random(5)==1)  then  -- either end of growth or above trunk randomly
 				local r;
-				if life <=0 then r = math.random(2)+1; -- determine leaves region size
-					else r = math.random(2);
+				if branchlength < 2 then r = math.random(2,branchlength+2);
+				elseif life <=0 then r = math.random(2)+1; -- determine leaves region size
+				else r = math.random(2);
 				end
 				
 				local i,j,k
@@ -239,6 +371,8 @@ minetest.register_abm({
 				if dirlen == 0 then dirlen = 1 end;	dir.x=dir.x/dirlen; dir.y=dir.y/dirlen; dir.z=dir.z/dirlen; -- normalize
 				
 				local length = math.random(math.pow(life/treesize,1.5)*branchlength)+1; -- length of branch
+				if branchlength < 2 then length = branchlength + 1; -- length of branch
+				end
 				for i=1,length-1 do
 					local p = {x=above.x+dir.x*i,y=above.y+dir.y*i,z=above.z+dir.z*i};
 					nodename = minetest.get_node(p).name;
@@ -305,7 +439,7 @@ minetest.register_abm({
 								minetest.set_node({x=pos.x-1,y=pos.y,z=pos.z-2},{name=trunkmat});
 								minetest.set_node({x=pos.x-2,y=pos.y,z=pos.z},{name=trunkmat});
 								minetest.set_node({x=pos.x-2,y=pos.y,z=pos.z-1},{name=trunkmat});
-							elseif (treesize +branchlength) > 40 then
+							elseif (treesize + branchlength) > 40 then
 								-------
 								--x0x--
 								--000--
