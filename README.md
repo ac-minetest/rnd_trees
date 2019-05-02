@@ -4,7 +4,11 @@
 
 ![Screenshot 1](https://i.imgur.com/LD6VcO1.jpg)
 
+Foreground: stone and wooden fence, Background: Bone and ethereal mushroom
+
 ![Screenshot 2](https://i.imgur.com/p263ejK.jpg)
+
+A nice selection of materials and growth specs
 
 ## How to use:
 
