@@ -13,7 +13,9 @@ A nice selection of materials and growth specs
 ## How to install:
 
 Download repository as zip
+
 Rename folder to "rnd_trees"
+
 Place folder in minetest install directory -> mods
 
 ## How to use:
