@@ -1,6 +1,6 @@
 # Create naturally-growing trees from any material
 
-[<img src="https://img.shields.io/badge/Download-Github-green">](https://www.github.com)
+[<img src="https://img.shields.io/badge/Download-Zip-green">](https://github.com/Max-Davy/rnd_trees/archive/master.zip)
 
 ## Screenshots:
 
