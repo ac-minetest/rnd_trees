@@ -1,5 +1,7 @@
 # Create naturally-growing trees from any material
 
+[<img src="https://img.shields.io/badge/Download-Github-green">](https://www.github.com)
+
 ## Screenshots:
 
 ![Screenshot 1](https://i.imgur.com/LD6VcO1.jpg)
